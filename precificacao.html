@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Precificação - Cosméticos</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0f172a;
+            --primary-light: #1e293b;
+            --accent: #2563eb;
+            --accent-hover: #1d4ed8;
+            --success: #10b981;
+            --success-hover: #059669;
+            --danger: #ef4444;
+            --danger-hover: #dc2626;
+            --warning: #f59e0b;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #334155;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            font-size: 15px;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            box-shadow: var(--shadow-md);
+            width: 100%;
+        }
+
+        .header-container {
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        header h1 {
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .workspace {
+            flex: 1;
+            padding: 20px;
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            align-items: start;
+        }
+
+        @media (min-width: 1024px) {
+            .main-layout { grid-template-columns: 380px 1fr; }
+        }
+
+        .panel {
+            background: var(--card-bg);
+            padding: 20px 24px;
+            border-radius: 12px;
+            box-shadow: var(--shadow-md);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .panel-header h2 {
+            font-size: 17px;
+            color: var(--primary);
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-action.save {
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            background: linear-gradient(135deg, var(--accent), #60a5fa);
+            color: white;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+            transition: all 0.2s;
+        }
+
+        .btn-action.save:hover { 
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+            background: linear-gradient(135deg, var(--accent-hover), #3b82f6);
+        }
+
+        .save-status {
+            font-size: 12px;
+            color: var(--success);
+            font-weight: 600;
+            margin-bottom: 10px;
+            display: inline-block;
+            opacity: 0;
+            transition: opacity 0.3s;
+            background: #ecfdf5;
+            padding: 4px 10px;
+            border-radius: 6px;
+            border: 1px solid #a7f3d0;
+        }
+
+        .section-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--primary);
+            margin: 15px 0 10px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .form-group { margin-bottom: 12px; }
+        
+        .form-group label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: var(--text);
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            background-color: #f8fafc;
+            color: var(--primary);
+        }
+
+        .form-group input:focus {
+            border-color: var(--accent);
+            background-color: #fff;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .row-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .kpi-card {
+            background: var(--card-bg);
+            padding: 16px 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            transition: transform 0.2s ease;
+        }
+
+        .kpi-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+
+        .kpi-card.highlight { background: #eff6ff; border-color: #bfdbfe; }
+        .kpi-card.success { background: #f0fdf4; border-color: #bbf7d0; }
+        /* Novo estilo para o Valor Mínimo (Alerta de Zero Lucro) */
+        .kpi-card.warning { background: #fffbeb; border-color: #fde68a; }
+
+        .kpi-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-light);
+            margin-bottom: 6px;
+        }
+
+        .kpi-value {
+            font-size: 26px;
+            font-weight: 800;
+            color: var(--primary);
+            letter-spacing: -0.5px;
+        }
+
+        .highlight .kpi-value { color: var(--accent); }
+        .success .kpi-value { color: var(--success); }
+        .warning .kpi-value { color: var(--warning); }
+
+        .extrato-box {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px 24px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .extrato-box h2 {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 12px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .extrato-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px dashed var(--border);
+            font-size: 14px;
+        }
+
+        .extrato-row:last-child { border-bottom: none; padding-bottom: 0; }
+        .extrato-row .label { color: var(--text); font-weight: 500; }
+        .extrato-row .value { font-weight: 700; font-family: 'Inter', monospace; font-size: 14px; }
+        
+        .value.negative { color: var(--danger); }
+        .value.positive { color: var(--success); }
+
+        .btn-limpar {
+            width: 100%;
+            padding: 12px;
+            background: white;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text);
+            cursor: pointer;
+            margin-top: 15px;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-limpar:hover { 
+            background: var(--bg); 
+            border-color: #94a3b8;
+        }
+
+        .btn-apagar-tudo {
+            width: 100%;
+            padding: 12px;
+            background: transparent;
+            border: 1px dashed #fca5a5;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--danger);
+            cursor: pointer;
+            margin-top: 10px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-apagar-tudo:hover {
+            background: #fef2f2;
+            border-style: solid;
+        }
+
+        .error-banner {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: var(--danger);
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 13px;
+            margin-bottom: 20px;
+            display: none;
+            box-shadow: 0 2px 4px rgba(239, 68, 68, 0.05);
+        }
+        
+        .extrato-row.highlight-base {
+            background: #f8fafc; 
+            padding: 12px 16px; 
+            border-radius: 8px; 
+            margin-top: 10px; 
+            border: 1px solid var(--border);
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-container">
+            <h1>Calculadora de Custos e Precificação</h1>
+        </div>
+    </header>
+
+    <div class="workspace">
+        <div class="main-layout">
+            
+            <div class="panel">
+                <div class="panel-header">
+                    <h2>Inserir Dados do Produto</h2>
+                    <div class="header-actions">
+                        <button class="btn-action save" onclick="salvarPadroes()">Salvar Padrões</button>
+                    </div>
+                </div>
+                
+                <div id="msg-salvo" class="save-status">Padrões salvos no navegador!</div>
+
+                <div class="section-title">Custos Diretos (R$)</div>
+                
+                <div class="form-group">
+                    <label>Custo do Produto (R$)</label>
+                    <input type="text" id="custo-produto" placeholder="0,00">
+                </div>
+                
+                <div class="row-inputs">
+                    <div class="form-group">
+                        <label>Embalagem (R$)</label>
+                        <input type="text" id="embalagem" placeholder="0,00">
+                    </div>
+                    <div class="form-group">
+                        <label>Frete (R$)</label>
+                        <input type="text" id="frete" placeholder="0,00">
+                    </div>
+                </div>
+
+                <div class="section-title">
+                    <span>Taxas e Despesas Fim (%)</span>
+                    <span style="font-size: 10px; color: #94a3b8; font-weight: normal;">*Preencha e salve os padrões</span>
+                </div>
+                
+                <div class="row-inputs">
+                    <div class="form-group">
+                        <label>Taxa da Maquininha <span>%</span></label>
+                        <input type="text" id="taxa-maquina" placeholder="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Custos Fixos <span>%</span></label>
+                        <input type="text" id="custos-fixos" placeholder="0">
+                    </div>
+                </div>
+
+                <div class="row-inputs">
+                    <div class="form-group">
+                        <label>Pró-labore <span>%</span></label>
+                        <input type="text" id="prolabore" placeholder="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Outros <span>%</span></label>
+                        <input type="text" id="outros" placeholder="0">
+                    </div>
+                </div>
+
+                <div class="section-title" style="color: var(--accent); margin-top: 20px;">
+                    Margem Desejada
+                </div>
+                
+                <div class="form-group">
+                    <label style="color: var(--accent);">% em Cima do Produto (Lucro Alvo) <span>%</span></label>
+                    <input type="text" id="margem-alvo" placeholder="0" style="border: 1px solid var(--accent); background-color: #eff6ff;">
+                </div>
+
+                <button class="btn-limpar" onclick="limparCalculadora()">Nova Consulta (Manter Taxas)</button>
+                <button class="btn-apagar-tudo" onclick="limparTudo()">Apagar Tudo e Resetar Padrões</button>
+            </div>
+
+            <div class="panel" style="background-color: transparent; border: none; box-shadow: none; padding: 0;">
+                
+                <div id="alerta-erro" class="error-banner">
+                    ⚠️ Atenção: A soma das taxas (Maquininha + Fixos + Pró-labore + Outros + Margem) é igual ou maior que 100%. É matematicamente impossível precificar assim sem gerar prejuízo.
+                </div>
+
+                <div class="dashboard-grid">
+                    <div class="kpi-card warning">
+                        <div class="kpi-title">Valor Mínimo (Zero Lucro)</div>
+                        <div class="kpi-value" id="res-valor-minimo">R$ 0,00</div>
+                    </div>
+                    
+                    <div class="kpi-card highlight">
+                        <div class="kpi-title">Valor Ideal de Venda</div>
+                        <div class="kpi-value" id="res-valor-ideal">R$ 0,00</div>
+                    </div>
+
+                    <div class="kpi-card success">
+                        <div class="kpi-title">Lucro Líquido (<span id="res-lucro-pct">0,00%</span>)</div>
+                        <div class="kpi-value" id="res-lucro-liquido">R$ 0,00</div>
+                    </div>
+
+                    <div class="kpi-card">
+                        <div class="kpi-title">Custos Totais (Saída)</div>
+                        <div class="kpi-value" id="res-custo-total" style="color: var(--danger);">R$ 0,00</div>
+                    </div>
+                </div>
+
+                <div class="extrato-box">
+                    <h2>Detalhamento Financeiro da Venda</h2>
+                    
+                    <div class="extrato-row">
+                        <span class="label">Total Custos Diretos (Produto + Emb + Frete)</span>
+                        <span class="value negative" id="detalhe-custo-direto">- R$ 0,00</span>
+                    </div>
+                    
+                    <div class="extrato-row">
+                        <span class="label">Taxa da Maquininha (<span id="lbl-maq">0</span>%)</span>
+                        <span class="value negative" id="detalhe-maq">- R$ 0,00</span>
+                    </div>
+                    
+                    <div class="extrato-row">
+                        <span class="label">Custos Fixos (<span id="lbl-fixos">0</span>%)</span>
+                        <span class="value negative" id="detalhe-fixos">- R$ 0,00</span>
+                    </div>
+
+                    <div class="extrato-row">
+                        <span class="label">Pró-labore (<span id="lbl-pro">0</span>%)</span>
+                        <span class="value negative" id="detalhe-pro">- R$ 0,00</span>
+                    </div>
+
+                    <div class="extrato-row">
+                        <span class="label">Outros (<span id="lbl-outros">0</span>%)</span>
+                        <span class="value negative" id="detalhe-outros">- R$ 0,00</span>
+                    </div>
+
+                    <div class="extrato-row highlight-base">
+                        <span class="label" style="font-weight: 700; color: var(--primary);">Preço Base de Cálculo Usado:</span>
+                        <span class="value" id="detalhe-base-venda" style="color: var(--primary); font-size: 16px;">R$ 0,00</span>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        function aplicarMascara(input, isMoeda = true) {
+            let valor = input.value.replace(/\D/g, ''); 
+            if (!valor) {
+                input.value = '';
+                return;
+            }
+            if (isMoeda) {
+                valor = (parseInt(valor, 10) / 100).toFixed(2); 
+                valor = valor.replace('.', ',');
+                valor = valor.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.');
+            } else {
+                valor = valor.replace(/(\d)(?=(\d{2})$)/, '$1,');
+            }
+            input.value = valor;
+        }
+
+        function getVal(id) {
+            let val = document.getElementById(id).value;
+            if (!val) return 0;
+            return parseFloat(val.replace(/\./g, '').replace(',', '.'));
+        }
+
+        function formatBRL(valor) {
+            return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        }
+
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener('input', function(e) {
+                let id = e.target.id;
+                let isMoeda = ['custo-produto', 'embalagem', 'frete'].includes(id);
+                
+                if (isMoeda) {
+                    aplicarMascara(e.target, true);
+                } else {
+                    let v = e.target.value.replace(/[^0-9,]/g, '');
+                    e.target.value = v;
+                }
+                
+                calcular();
+            });
+        });
+
+        function salvarPadroes() {
+            const padroes = {
+                embalagem: document.getElementById('embalagem').value,
+                taxaMaq: document.getElementById('taxa-maquina').value,
+                custosFixos: document.getElementById('custos-fixos').value,
+                prolabore: document.getElementById('prolabore').value,
+                outros: document.getElementById('outros').value,
+                margem: document.getElementById('margem-alvo').value
+            };
+            
+            localStorage.setItem('padroes_precificacao_cosmeticos', JSON.stringify(padroes));
+            
+            const msg = document.getElementById('msg-salvo');
+            msg.style.opacity = '1';
+            setTimeout(() => { msg.style.opacity = '0'; }, 3000);
+        }
+
+        function carregarPadroes() {
+            const dadosSalvos = localStorage.getItem('padroes_precificacao_cosmeticos');
+            if (dadosSalvos) {
+                const padroes = JSON.parse(dadosSalvos);
+                if(padroes.embalagem) document.getElementById('embalagem').value = padroes.embalagem;
+                if(padroes.taxaMaq) document.getElementById('taxa-maquina').value = padroes.taxaMaq;
+                if(padroes.custosFixos) document.getElementById('custos-fixos').value = padroes.custosFixos;
+                if(padroes.prolabore) document.getElementById('prolabore').value = padroes.prolabore;
+                if(padroes.outros) document.getElementById('outros').value = padroes.outros;
+                if(padroes.margem) document.getElementById('margem-alvo').value = padroes.margem;
+            }
+        }
+
+        function zerarPainel() {
+            document.getElementById('res-valor-minimo').innerText = 'R$ 0,00';
+            document.getElementById('res-valor-ideal').innerText = 'R$ 0,00';
+            document.getElementById('res-lucro-liquido').innerText = 'R$ 0,00';
+            document.getElementById('res-lucro-pct').innerText = '0,00%';
+            document.getElementById('res-custo-total').innerText = 'R$ 0,00';
+
+            const lucroCard = document.getElementById('res-lucro-liquido').parentElement;
+            lucroCard.className = 'kpi-card success';
+            lucroCard.style.backgroundColor = '#f0fdf4';
+            lucroCard.style.borderColor = '#bbf7d0';
+            document.getElementById('res-lucro-liquido').style.color = 'var(--success)';
+
+            document.getElementById('detalhe-custo-direto').innerText = '- R$ 0,00';
+            document.getElementById('detalhe-maq').innerText = '- R$ 0,00';
+            document.getElementById('detalhe-fixos').innerText = '- R$ 0,00';
+            document.getElementById('detalhe-pro').innerText = '- R$ 0,00';
+            document.getElementById('detalhe-outros').innerText = '- R$ 0,00';
+            document.getElementById('detalhe-base-venda').innerText = 'R$ 0,00';
+        }
+
+        function calcular() {
+            const custoProd = getVal('custo-produto');
+            const embalagem = getVal('embalagem');
+            const frete = getVal('frete');
+            
+            if (custoProd === 0) {
+                zerarPainel();
+                return;
+            }
+
+            const custoDiretoTotal = custoProd + embalagem + frete;
+
+            const taxaMaq = getVal('taxa-maquina');
+            const custosFixos = getVal('custos-fixos');
+            const prolabore = getVal('prolabore');
+            const outros = getVal('outros');
+            const margemAlvo = getVal('margem-alvo');
+            
+            // SEPARAÇÃO DA MATEMÁTICA: Taxas (Sem Lucro) e Total (Com Lucro)
+            const somaTaxasDespesasPct = (taxaMaq + custosFixos + prolabore + outros) / 100;
+            const somaTotalPct = somaTaxasDespesasPct + (margemAlvo / 100);
+            
+            const alerta = document.getElementById('alerta-erro');
+            
+            if (somaTotalPct >= 1 && custoDiretoTotal > 0) {
+                alerta.style.display = 'block';
+                zerarPainel();
+                return;
+            } else {
+                alerta.style.display = 'none';
+            }
+
+            let valorMinimoBreakEven = 0;
+            let valorIdeal = 0;
+            
+            if (custoDiretoTotal > 0) {
+                // Cálculo do Ponto de Equilíbrio (0% de Lucro)
+                valorMinimoBreakEven = custoDiretoTotal / (1 - somaTaxasDespesasPct);
+                // Cálculo do Valor Ideal (Com a margem desejada)
+                valorIdeal = custoDiretoTotal / (1 - somaTotalPct);
+            }
+
+            // O Extrato e o Lucro agora são baseados sempre no Valor Ideal
+            let baseCalculoVenda = valorIdeal; 
+
+            const valTaxaMaq = baseCalculoVenda * (taxaMaq / 100);
+            const valCustosFixos = baseCalculoVenda * (custosFixos / 100);
+            const valProlabore = baseCalculoVenda * (prolabore / 100);
+            const valOutros = baseCalculoVenda * (outros / 100);
+
+            const totalDeducoes = valTaxaMaq + valCustosFixos + valProlabore + valOutros;
+            const custosTotalGeral = custoDiretoTotal + totalDeducoes;
+            const lucroLiquido = baseCalculoVenda - custosTotalGeral;
+            
+            let lucroRealPct = 0;
+            if (baseCalculoVenda > 0) {
+                lucroRealPct = (lucroLiquido / baseCalculoVenda) * 100;
+            }
+
+            document.getElementById('res-valor-minimo').innerText = formatBRL(valorMinimoBreakEven);
+            document.getElementById('res-valor-ideal').innerText = formatBRL(valorIdeal);
+            document.getElementById('res-lucro-liquido').innerText = formatBRL(lucroLiquido);
+            
+            // Exibe a porcentagem do lucro real direto no título do Card Verde
+            document.getElementById('res-lucro-pct').innerText = lucroRealPct.toFixed(2).replace('.', ',') + '%';
+            
+            document.getElementById('res-custo-total').innerText = formatBRL(custosTotalGeral);
+
+            const lucroCard = document.getElementById('res-lucro-liquido').parentElement;
+            if(lucroLiquido < 0) {
+                lucroCard.className = 'kpi-card';
+                lucroCard.style.backgroundColor = '#fef2f2';
+                lucroCard.style.borderColor = '#fecaca';
+                document.getElementById('res-lucro-liquido').style.color = 'var(--danger)';
+            } else {
+                lucroCard.className = 'kpi-card success';
+                lucroCard.style.backgroundColor = '#f0fdf4';
+                lucroCard.style.borderColor = '#bbf7d0';
+                document.getElementById('res-lucro-liquido').style.color = 'var(--success)';
+            }
+
+            document.getElementById('detalhe-custo-direto').innerText = '- ' + formatBRL(custoDiretoTotal);
+            document.getElementById('lbl-maq').innerText = taxaMaq.toString().replace('.', ',');
+            document.getElementById('detalhe-maq').innerText = '- ' + formatBRL(valTaxaMaq);
+            document.getElementById('lbl-fixos').innerText = custosFixos.toString().replace('.', ',');
+            document.getElementById('detalhe-fixos').innerText = '- ' + formatBRL(valCustosFixos);
+            document.getElementById('lbl-pro').innerText = prolabore.toString().replace('.', ',');
+            document.getElementById('detalhe-pro').innerText = '- ' + formatBRL(valProlabore);
+            document.getElementById('lbl-outros').innerText = outros.toString().replace('.', ',');
+            document.getElementById('detalhe-outros').innerText = '- ' + formatBRL(valOutros);
+            document.getElementById('detalhe-base-venda').innerText = formatBRL(baseCalculoVenda);
+        }
+
+        function limparCalculadora() {
+            document.getElementById('custo-produto').value = '';
+            document.getElementById('frete').value = '';
+            carregarPadroes();
+            document.getElementById('alerta-erro').style.display = 'none';
+            zerarPainel(); 
+        }
+
+        function limparTudo() {
+            if(confirm("Deseja apagar todos os valores da tela e esquecer os Padrões Salvos?")) {
+                localStorage.removeItem('padroes_precificacao_cosmeticos');
+                document.querySelectorAll('input').forEach(input => input.value = '');
+                document.getElementById('alerta-erro').style.display = 'none';
+                zerarPainel();
+            }
+        }
+
+        carregarPadroes();
+        zerarPainel(); 
+    </script>
+</body>
+</html>
